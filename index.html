@@ -466,6 +466,9 @@
       <button class="listen-btn" id="listen-btn" onclick="speakWord()">
         🔊 Listen
       </button>
+      <button class="listen-btn" id="listen-slow-btn" onclick="speakWordSlowly()" style="background:#e8f4fd;color:#1565c0;border:2px solid #90caf9;margin-left:8px">
+        🐢 Slowly
+      </button>
       <br>
       <input type="text"
         class="spell-input"
@@ -1046,22 +1049,27 @@ function loadQuestion() {
   setTimeout(() => speakWord(), 600);
 }
 
-function speakWord() {
+function speakWord(rate = 0.85) {
   if (!window.speechSynthesis) return;
   const w = quizWords[currentQ];
   speechSynth.cancel();
 
   const utter = new SpeechSynthesisUtterance(w.word);
-  utter.rate = 0.85;
+  utter.rate = rate;
   utter.pitch = 1;
   utter.lang = 'en-CA';
 
-  const listenBtn = document.getElementById('listen-btn');
-  listenBtn.classList.add('speaking');
-  utter.onend = () => listenBtn.classList.remove('speaking');
-  utter.onerror = () => listenBtn.classList.remove('speaking');
+  const isSlow = rate < 0.7;
+  const activeBtn = document.getElementById(isSlow ? 'listen-slow-btn' : 'listen-btn');
+  activeBtn.classList.add('speaking');
+  utter.onend = () => activeBtn.classList.remove('speaking');
+  utter.onerror = () => activeBtn.classList.remove('speaking');
 
   speechSynth.speak(utter);
+}
+
+function speakWordSlowly() {
+  speakWord(0.4);
 }
 
 function handleKey(e) {
